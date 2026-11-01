@@ -1,0 +1,20 @@
+Ledger: FabricLedger   Input: PTB-XL ecg_id=132 labels=['NORM']
+
+Case CASE-FFCC8C2625DB — agent trace:
+  agent              status          try       ms  artifacts / message
+  ✔ agent.ingest     ok                1   4123.4  RAW_ECG-A0B39F366D34, RAW_REPORT-631297E882B5
+  ✔ agent.preprocess ok                1   2093.9  PROCESSED-DEC97158D000
+  ✔ agent.features   ok                1   2085.5  FEATURES-583281FC908E
+  ✘ agent.predict    failed            1      0.0  RuntimeError: simulated crash of agent.predict
+  ✔ agent.integrity  ok                1     63.1  
+  ✔ agent.validate   ok                1   2098.1  VALIDATION-DA21CDA3B1FE
+  ✔ agent.explain    ok                1   4145.8  EXPLANATION-B4DF527F7E72, FINAL-2F10B1173DAD
+
+Final status : REJECTED
+Failed checks: ['artifacts_complete']
+Explanation  : Measured heart rate: 80 bpm over 13 complete beats; signal quality score 1.00. Check 'artifacts_complete' failed: missing: ['PREDICTION']. Rejected: the processing chain is incomplete or an integrity problem was detected. This is an educational prototype, not a medical diagnosis.
+Error        : agent.predict: simulated crash of agent.predict
+
+Audit agent  : integrity of the 7 artifacts on the ledger = VALID
+
+Re-verify later: python scripts/run_case_demo.py --verify CASE-FFCC8C2625DB

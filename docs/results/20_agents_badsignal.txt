@@ -1,0 +1,18 @@
+Ledger: FabricLedger   Input: PTB-XL ecg_id=132 labels=['NORM']
+
+Case CASE-510A14BFD0F1 — agent trace:
+  agent              status          try       ms  artifacts / message
+  ✔ agent.ingest     ok                1   4137.3  RAW_ECG-A57269478982, RAW_REPORT-77BB5439F1B4
+  ⚠ agent.preprocess rejected_input    1      0.2  preprocessing failed: too many missing values (30.0%)
+  ✔ agent.integrity  ok                1     22.1  
+  ✔ agent.validate   ok                1   2065.9  VALIDATION-E544EE0AEA5C
+  ✔ agent.explain    ok                1   4111.6  EXPLANATION-F8A0F2D7F40C, FINAL-67388151FA4A
+
+Final status : REJECTED
+Failed checks: ['artifacts_complete']
+Explanation  : Check 'artifacts_complete' failed: missing: ['PROCESSED', 'FEATURES', 'PREDICTION']. Rejected: the processing chain is incomplete or an integrity problem was detected. This is an educational prototype, not a medical diagnosis.
+Error        : preprocessing failed: too many missing values (30.0%)
+
+Audit agent  : integrity of the 5 artifacts on the ledger = VALID
+
+Re-verify later: python scripts/run_case_demo.py --verify CASE-510A14BFD0F1

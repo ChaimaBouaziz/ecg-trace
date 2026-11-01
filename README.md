@@ -17,8 +17,8 @@ recorded on Hyperledger Fabric. Dataset: **PTB-XL v1.0.3** (PhysioNet).
 | 4 | Artifact chain + hashing — `pipeline/artifacts.py`, `pipeline/storage.py` | C | ✅ |
 | 5 | End-to-end with FakeLedger + integrity check — `pipeline/run_case.py`, `pipeline/verify.py`, `scripts/run_case_demo.py` | C | ✅ |
 | 6 | Fabric: chaincode `chaincode/ecg-trace`, REST gateway `blockchain-gateway`, `ledger/fabric_client.py` — see `docs/FABRIC_SETUP.md` | B | ✅ (to run on your machine) |
-| 7 | Agents (orchestrator + one agent per step, LangGraph) | C | |
-| 8 | FastAPI + web dashboard | C | |
+| 7 | Agents: LangGraph orchestrator, 7 agents + audit, retries, traced errors, pseudonymisation — `agents/orchestrator.py`, `scripts/run_agents_demo.py` | C | ✅ |
+| 8 | FastAPI + web dashboard (live agents, ECG chart, provenance, verify, tamper demo) — `api/main.py`, `ui/index.html` | C | ✅ |
 | 9 | Integrity verification + tamper demo + tests | all | |
 | 10 | Docker + final report | all | |
 
@@ -70,6 +70,19 @@ PTB-XL facts used later:
 - `strat_fold`: folds 1–8 train, 9 val, 10 test (official split; records of a patient stay together)
 - data is already pseudonymised; our pipeline still assigns its own `CASE-…` id
 
+## Run the demo (3 terminals, all in WSL)
+
+```bash
+./scripts/fabric.sh up                                   # 1. Fabric network + chaincode
+cd blockchain-gateway && npm start                       # 2. gateway (keep open)
+source .venv/bin/activate
+LEDGER=fabric uvicorn api.main:app --port 8000           # 3. API + dashboard (keep open)
+```
+Open http://localhost:8000 -> run a sample -> watch the agents -> **Verify integrity** ->
+**Tamper file** -> **Verify integrity** (MODIFIED) -> **Restore** -> **Verify** (VALID).
+Without Fabric: `uvicorn api.main:app --port 8000` (FakeLedger). API docs: http://localhost:8000/docs.
+Optional security: `API_KEY=secret` -> write operations require the `X-API-Key` header.
+
 ## Layout
 
 ```
@@ -77,8 +90,9 @@ pipeline/   schemas, hashing, ptbxl loader, (next) preprocess, model, validate
 ledger/     base interface, fake_ledger, fabric_client, factory (LEDGER=fake|fabric)
 chaincode/  Fabric chaincode (JavaScript)
 blockchain-gateway/  Node REST gateway Python -> Fabric
-agents/     orchestrator + step agents (step 7)
-api/ ui/    FastAPI + dashboard (step 8)
+agents/     LangGraph orchestrator + specialised agents
+api/        FastAPI backend (upload, jobs, cases, verify, demo tamper/restore)
+ui/         single-page dashboard served at http://localhost:8000
 scripts/    download / explore / train
 data/       raw/ (git-ignored), offchain/ (git-ignored)
 tests/

@@ -10,4 +10,6 @@ data/fake_ledger.json
 models/*.pkl
 docs/exploration/
 fabric-samples/
-node_modules/data/features_cache.npz
+node_modules/
+data/features_cache.npz
+data/tamper_backup/

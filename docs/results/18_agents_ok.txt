@@ -1,0 +1,20 @@
+Ledger: FabricLedger   Input: PTB-XL ecg_id=132 labels=['NORM']
+
+Case CASE-2E39F35A3D08 — agent trace:
+  agent              status          try       ms  artifacts / message
+  ✔ agent.ingest     ok                1   4171.1  RAW_ECG-0C397D309D2F, RAW_REPORT-2AEF230116A1
+  ✔ agent.preprocess ok                1   2078.8  PROCESSED-71658EC3727A
+  ✔ agent.features   ok                1   2059.1  FEATURES-0E10D122A6A6
+  ✔ agent.predict    ok                1   2102.3  PREDICTION-05439A2C095D
+  ✔ agent.integrity  ok                1     36.5  
+  ✔ agent.validate   ok                1   2069.2  VALIDATION-E3F1CCAF71EE
+  ✔ agent.explain    ok                1   4129.1  EXPLANATION-52AFF0903F8B, FINAL-A8CDB39D95FC
+
+Final status : ACCEPTED
+Prediction   : NORM (0.99)
+Failed checks: []
+Explanation  : The model ecg-binary-norm-vs-abnormal v1.0.0 classified this recording as a normal ECG with a confidence of 99%. Measured heart rate: 80 bpm over 13 complete beats; signal quality score 1.00. The medical report was read as NORM. Accepted for the prototype: all configured checks passed. This is an educational prototype, not a medical diagnosis.
+
+Audit agent  : integrity of the 8 artifacts on the ledger = VALID
+
+Re-verify later: python scripts/run_case_demo.py --verify CASE-2E39F35A3D08

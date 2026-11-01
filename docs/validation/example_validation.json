@@ -8,9 +8,9 @@
     },
     "model_name": "ecg-binary-norm-vs-abnormal",
     "model_version": "1.0.0",
-    "model_file_sha256": "ef46c6828d807f90b8201bdd59582059ea391e3eb65954044885a545fdb46b01",
+    "model_file_sha256": "6b7ecccd470965e0abf123e742c6c54463b724b30c8c92e0e27d594b55637a3c",
     "input_artifact_id": "FEATURES-57",
-    "analysed_at": "2026-11-01T13:36:59+00:00"
+    "analysed_at": "2026-11-01T16:48:39+00:00"
   },
   "validation": {
     "status": "ACCEPTED",

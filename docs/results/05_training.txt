@@ -1,0 +1,33 @@
+Using cached features (data/features_cache.npz)
+
+Records: 1960  (train 1568, val 196, test 196)
+Class balance: {'ABNORMAL': np.int64(1136), 'NORM': np.int64(824)}
+
+Validation (fold 9):
+  logreg                   {'accuracy': 0.8316, 'f1_macro': 0.8261, 'roc_auc': 0.9064}
+  random_forest            {'accuracy': 0.8316, 'f1_macro': 0.8267, 'roc_auc': 0.9202}
+  hist_gradient_boosting   {'accuracy': 0.8163, 'f1_macro': 0.8119, 'roc_auc': 0.9355}
+
+Best on validation: hist_gradient_boosting
+Test (fold 10): {'accuracy': 0.8214, 'f1_macro': 0.8206, 'roc_auc': 0.9183}
+              precision    recall  f1-score   support
+
+    ABNORMAL      0.888     0.784     0.833       111
+        NORM      0.755     0.871     0.809        85
+
+    accuracy                          0.821       196
+   macro avg      0.821     0.827     0.821       196
+weighted avg      0.830     0.821     0.822       196
+
+Confusion matrix (rows = true, cols = predicted): ['ABNORMAL', 'NORM']
+[[87 24]
+ [11 74]]
+
+Confidence vs accuracy on test:
+  conf >= 0.5: 100.0% of cases, accuracy 0.821
+  conf >= 0.6: 96.9% of cases, accuracy 0.837
+  conf >= 0.7: 93.9% of cases, accuracy 0.848
+  conf >= 0.8: 89.3% of cases, accuracy 0.863
+  conf >= 0.9: 82.1% of cases, accuracy 0.876
+
+Saved models/ecg_binary_v1.joblib and model card models/ecg_binary_v1.json

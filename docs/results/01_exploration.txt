@@ -1,0 +1,32 @@
+Records available locally : 2000
+Patients                  : 1969
+
+Superclass counts (multi-label):
+ NORM    876
+MI      492
+STTC    474
+CD      460
+HYP     220
+
+No diagnostic label : 40
+Single label        : 1500  <- easiest to start with
+Multiple labels     : 460
+
+Quality flags (non-empty = problem noted):
+baseline_drift         142
+static_noise           305
+burst_noise             45
+electrodes_problems      4
+extra_beats            173
+pacemaker               29
+
+Report examples:
+  [STTC] sinus rhythm. non-specific t wave flattening in i, avl, v4,5,6. myocardial ischaemia is likely.
+  [HYP,MI,STTC] sinustachykardie linkstyp linksschenkelblock
+  [NORM] sinus rhythm. normal ecg.
+  [STTC] sinus bradycardia. minor non-specific t wave flattening in v3,4. the cause of the bradycardia is not evident.
+  [CD,MI] sinusrhythmus a-v block i lagetyp normal qrs(t) abnorm    inferiorer infarkt     alter unbest. 4.46           
+
+Signal shape (1000, 12), fs=100 Hz, leads=['I', 'II', 'III', 'AVR', 'AVL', 'AVF', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6']
+
+Figures saved in /home/chaima/ecg-trace/docs/exploration

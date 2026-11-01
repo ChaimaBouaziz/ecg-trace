@@ -1,0 +1,52 @@
+Ledger: FabricLedger
+Input: PTB-XL ecg_id=57 (true labels ['NORM'])
+Report: sinusrhythmus normales ekg
+
+Case CASE-EFA0C62329C1 — processing log:
+  agent.ingest: RAW_ECG RAW_ECG-368EF480BDDA sha256=0fe89e7433ce… tx=f58e297136…
+  agent.ingest: RAW_REPORT RAW_REPORT-289BD5C2E795 sha256=00a997d68f81… tx=9e391ee2a6…
+  agent.preprocess: PROCESSED PROCESSED-FDADF355320A sha256=d1699ca390af… tx=eb3c911b16…
+  agent.features: FEATURES FEATURES-071076EE6784 sha256=3653c0bd22ad… tx=af4d0dfaa6…
+  agent.predict: PREDICTION PREDICTION-21080EA5DB16 sha256=a85ca0585e3d… tx=249e10a28c…
+  agent.integrity: 5 artifacts checked against the ledger, all VALID
+  agent.validate: VALIDATION VALIDATION-09308CC4BCF1 sha256=3221887a8455… tx=ccb927dd3d…
+  agent.explain: EXPLANATION EXPLANATION-67F65348915D sha256=b91df06c6c85… tx=b8f7c72440…
+  agent.explain: FINAL FINAL-E83000458A45 sha256=5b566e7b1db4… tx=d05bd16237…
+
+History on the ledger (artifact -> parents):
+  RAW_ECG      RAW_ECG-368EF480BDDA       tx=f58e2971365e  <- (input)
+  RAW_REPORT   RAW_REPORT-289BD5C2E795    tx=9e391ee2a6aa  <- (input)
+  PROCESSED    PROCESSED-FDADF355320A     tx=eb3c911b167a  <- RAW_ECG-368EF480BDDA, RAW_REPORT-289BD5C2E795
+  FEATURES     FEATURES-071076EE6784      tx=af4d0dfaa64f  <- PROCESSED-FDADF355320A
+  PREDICTION   PREDICTION-21080EA5DB16    tx=249e10a28cdb  <- FEATURES-071076EE6784
+  VALIDATION   VALIDATION-09308CC4BCF1    tx=ccb927dd3da8  <- PREDICTION-21080EA5DB16, PROCESSED-FDADF355320A, RAW_REPORT-289BD5C2E795, RAW_ECG-368EF480BDDA
+  EXPLANATION  EXPLANATION-67F65348915D   tx=b8f7c72440c7  <- VALIDATION-09308CC4BCF1
+  FINAL        FINAL-E83000458A45         tx=d05bd1623785  <- EXPLANATION-67F65348915D, VALIDATION-09308CC4BCF1, PREDICTION-21080EA5DB16
+
+Prediction : NORM (confidence 1.00)
+Validation : ACCEPTED  failed=[]
+Explanation: The model ecg-binary-norm-vs-abnormal v1.0.0 classified this recording as a normal ECG with a confidence of 100%. Measured heart rate: 65 bpm over 10 complete beats; signal quality score 1.00. The medical report was read as NORM. Accepted for the prototype: all configured checks passed. This is an educational prototype, not a medical diagnosis.
+
+Integrity check of CASE-EFA0C62329C1: overall = VALID
+  OK RAW_ECG      VALID        ledger=0fe89e7433ce3edc  recomputed=0fe89e7433ce3edc
+  OK RAW_REPORT   VALID        ledger=00a997d68f81d347  recomputed=00a997d68f81d347
+  OK PROCESSED    VALID        ledger=d1699ca390af9332  recomputed=d1699ca390af9332
+  OK FEATURES     VALID        ledger=3653c0bd22ad3708  recomputed=3653c0bd22ad3708
+  OK PREDICTION   VALID        ledger=a85ca0585e3dddb3  recomputed=a85ca0585e3dddb3
+  OK VALIDATION   VALID        ledger=3221887a84557d7d  recomputed=3221887a84557d7d
+  OK EXPLANATION  VALID        ledger=b91df06c6c85c144  recomputed=b91df06c6c85c144
+  OK FINAL        VALID        ledger=5b566e7b1db4ca2e  recomputed=5b566e7b1db4ca2e
+
+>>> TAMPERING: editing PREDICTION-21080EA5DB16.json (changing the predicted class)
+
+Integrity check of CASE-EFA0C62329C1: overall = MODIFIED
+  OK RAW_ECG      VALID        ledger=0fe89e7433ce3edc  recomputed=0fe89e7433ce3edc
+  OK RAW_REPORT   VALID        ledger=00a997d68f81d347  recomputed=00a997d68f81d347
+  OK PROCESSED    VALID        ledger=d1699ca390af9332  recomputed=d1699ca390af9332
+  OK FEATURES     VALID        ledger=3653c0bd22ad3708  recomputed=3653c0bd22ad3708
+  !! PREDICTION   MODIFIED     ledger=a85ca0585e3dddb3  recomputed=4b9e43175c0115d1
+  OK VALIDATION   VALID        ledger=3221887a84557d7d  recomputed=3221887a84557d7d
+  OK EXPLANATION  VALID        ledger=b91df06c6c85c144  recomputed=b91df06c6c85c144
+  OK FINAL        VALID        ledger=5b566e7b1db4ca2e  recomputed=5b566e7b1db4ca2e
+
+Re-verify later with: python scripts/run_case_demo.py --verify CASE-EFA0C62329C1

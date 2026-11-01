@@ -1,0 +1,24 @@
+1) Report keyword reader (all records)
+   clear reading for 89.7% of reports
+   agreement with true label when clear: 93.1%
+    {('NORM', 'NORM'): 616, ('ABNORMAL', 'ABNORMAL'): 1021, ('NORM', 'ABNORMAL'): 104, ('ABNORMAL', 'NORM'): 18}
+
+2) Validation status on test fold (196 cases)
+status
+ACCEPTED           149
+REVIEW_REQUIRED     47
+
+   Why review? (failed checks)
+failed
+report_coherence    36
+ai_confidence       21
+
+3) AI accuracy by validation status
+                 accuracy  count
+status                          
+ACCEPTED            0.960    149
+REVIEW_REQUIRED     0.383     47
+
+   overall AI accuracy: 0.821
+
+Details: docs/validation/test_validation.csv — example: docs/validation/example_validation.json

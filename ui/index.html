@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ECG-Trace</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f4f6f9; --panel: #ffffff; --ink: #18202b; --muted: #637083; --line: #e3e7ee;
+    --accent: #2457d6; --accent-soft: #e8eefc;
+    --ok: #12805c; --ok-soft: #e3f5ee; --warn: #a15c00; --warn-soft: #fff3df;
+    --bad: #c0362c; --bad-soft: #fdeceb; --info-soft: #eef1f6;
+    --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+  header { display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: var(--panel);
+           border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; flex-wrap: wrap; }
+  header h1 { font-size: 17px; margin: 0; letter-spacing: .2px; }
+  header h1 span { color: var(--accent); }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px;
+          background: var(--info-soft); color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .dot.ok { background: var(--ok); } .dot.bad { background: var(--bad); }
+  .spacer { flex: 1; }
+  #apikey { width: 160px; }
+  .layout > *, .grid2 > * { min-width: 0; }
+  .layout { display: grid; grid-template-columns: 340px 1fr; gap: 16px; padding: 16px 20px; max-width: 1500px; margin: 0 auto; }
+  @media (max-width: 980px) { .layout { grid-template-columns: 1fr; padding: 12px 16px; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 10px; }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 8px 0 4px; }
+  input, select, textarea { width: 100%; font: inherit; padding: 7px 9px; border: 1px solid var(--line); border-radius: 7px; background: #fff; color: var(--ink); }
+  textarea { min-height: 64px; resize: vertical; }
+  button { font: inherit; padding: 7px 14px; border-radius: 7px; border: 1px solid var(--accent); background: var(--accent);
+           color: #fff; cursor: pointer; }
+  button.secondary { background: #fff; color: var(--accent); }
+  button.danger { background: #fff; color: var(--bad); border-color: var(--bad); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+  .tabs button { background: none; color: var(--muted); border: none; border-bottom: 2px solid transparent; border-radius: 0; padding: 6px 8px; }
+  .tabs button.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .small { font-size: 12px; color: var(--muted); }
+  a { color: var(--accent); }
+  .cases { list-style: none; margin: 0; padding: 0; max-height: 360px; overflow: auto; }
+  .cases li { padding: 7px 4px; border-bottom: 1px solid var(--line); cursor: pointer; display: flex; justify-content: space-between; gap: 8px; }
+  .cases li:hover { background: var(--accent-soft); }
+  .mono { font-family: var(--mono); font-size: 12px; }
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .ACCEPTED, .VALID, .ok { background: var(--ok-soft); color: var(--ok); }
+  .REVIEW_REQUIRED, .skipped, .rejected_input, .running { background: var(--warn-soft); color: var(--warn); }
+  .REJECTED, .MODIFIED, .MISSING, .FAILED, .failed { background: var(--bad-soft); color: var(--bad); }
+  .UNVERIFIABLE, .pending, .none { background: var(--info-soft); color: var(--muted); }
+  .pipeline { display: flex; gap: 6px; flex-wrap: wrap; }
+  .step { flex: 1 1 110px; border: 1px solid var(--line); border-radius: 8px; padding: 8px; min-width: 104px; }
+  .step .name { font-weight: 600; font-size: 13px; }
+  .step .meta { font-size: 11px; color: var(--muted); }
+  .step.ok { border-color: #b8e2d1; } .step.failed { border-color: #f1c1bd; } .step.running { border-color: #f3d39b; }
+  .step.rejected_input, .step.skipped { border-color: #f3d39b; }
+  .hero { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .hero .big { font-size: 22px; font-weight: 700; }
+  .bar { height: 8px; background: var(--info-soft); border-radius: 4px; overflow: hidden; width: 220px; }
+  .bar > div { height: 100%; background: var(--accent); }
+  .grid2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+  @media (max-width: 1200px) { .grid2 { grid-template-columns: 1fr; } }
+  .checks { list-style: none; padding: 0; margin: 0; }
+  .checks li { display: flex; gap: 8px; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+  .checks .ic { width: 18px; text-align: center; font-weight: 700; }
+  .pass { color: var(--ok); } .fail { color: var(--bad); }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 11px; text-transform: uppercase; color: var(--muted); letter-spacing: .5px; }
+  .banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 10px; font-weight: 600; }
+  .empty { color: var(--muted); text-align: center; padding: 40px 10px; }
+  #chartbox { position: relative; height: 240px; }
+  .toast { position: fixed; bottom: 16px; right: 16px; background: var(--ink); color: #fff; padding: 10px 14px; border-radius: 8px;
+           max-width: 420px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .toast.show { opacity: .95; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <h1>ECG<span>-Trace</span></h1>
+  <span class="pill"><span class="dot" id="ledgerDot"></span><span id="ledgerTxt">ledger…</span></span>
+  <span class="pill" id="modelTxt">model…</span>
+  <span class="spacer"></span>
+  <input id="apikey" class="hidden" placeholder="API key" type="password">
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="card">
+      <h2>New analysis</h2>
+      <div class="tabs">
+        <button class="active" data-tab="sample">PTB-XL sample</button>
+        <button data-tab="upload">Upload files</button>
+      </div>
+      <div id="tab-sample">
+        <label>Test-fold record</label>
+        <select id="sampleSel"><option>loading…</option></select>
+        <div class="small" id="sampleInfo" style="margin:6px 0 10px"></div>
+        <div class="row">
+          <button id="runSample">Run agents</button>
+          <a class="small" id="dlCsv" href="#">ECG .csv</a>
+          <a class="small" id="dlRep" href="#">report .txt</a>
+        </div>
+      </div>
+      <form id="tab-upload" class="hidden">
+        <label>ECG file (.csv / .npy) — or a WFDB pair (.hea + .dat)</label>
+        <input type="file" name="ecg" accept=".csv,.npy,.txt">
+        <div class="row" style="margin-top:6px">
+          <input type="file" name="hea" accept=".hea" style="flex:1"><input type="file" name="dat" accept=".dat" style="flex:1">
+        </div>
+        <label>Sampling rate (Hz, for .csv/.npy)</label>
+        <input name="fs" type="number" value="100" min="50" max="2000">
+        <label>Medical report (text or .txt file)</label>
+        <textarea name="report" placeholder="sinus rhythm. normal ecg."></textarea>
+        <input type="file" name="report_file" accept=".txt" style="margin-top:6px">
+        <label>Patient identifiers to remove (comma-separated)</label>
+        <input name="patient_identifiers" placeholder="e.g. full name, file number">
+        <div style="margin-top:10px"><button type="submit">Upload &amp; run</button></div>
+      </form>
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between"><h2 style="margin:0">Cases</h2>
+        <button class="secondary" id="refreshCases" style="padding:3px 10px">↻</button></div>
+      <ul class="cases" id="caseList"></ul>
+    </div>
+  </aside>
+
+  <main>
+    <div class="card">
+      <h2>Agent pipeline</h2>
+      <div class="pipeline" id="pipeline"></div>
+      <div class="small" id="jobInfo" style="margin-top:8px"></div>
+    </div>
+
+    <div id="caseView" class="hidden">
+      <div class="card">
+        <div class="hero">
+          <div><div class="small">Case</div><div class="mono" id="caseId"></div></div>
+          <div><div class="small">Decision</div><span class="badge" id="decision"></span></div>
+          <div><div class="small">AI prediction</div><div class="big" id="predClass">–</div></div>
+          <div><div class="small">Confidence <span id="confTxt"></span></div><div class="bar"><div id="confBar" style="width:0"></div></div></div>
+          <div class="small" id="modelUsed"></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="row" style="justify-content:space-between">
+            <h2 style="margin:0">ECG — lead II</h2>
+            <select id="sigMode" style="width:auto"><option value="processed">processed + R peaks</option><option value="raw">raw (mV)</option></select>
+          </div>
+          <div id="chartbox"><canvas id="chart"></canvas></div>
+        </div>
+        <div class="card">
+          <h2>Validation</h2>
+          <ul class="checks" id="checks"></ul>
+          <h2 style="margin-top:14px">Explanation</h2>
+          <div id="explanation"></div>
+          <h2 style="margin-top:14px">Medical report (pseudonymised)</h2>
+          <div class="mono" id="reportTxt"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between;margin-bottom:8px">
+          <h2 style="margin:0">Provenance on the ledger</h2>
+          <div class="row">
+            <button id="verifyBtn">Verify integrity</button>
+            <span class="small" id="demoBox">Demo:
+              <select id="tamperType" style="width:auto">
+                <option>PREDICTION</option><option>RAW_ECG</option><option>RAW_REPORT</option><option>PROCESSED</option>
+                <option>FEATURES</option><option>VALIDATION</option><option>FINAL</option>
+              </select>
+              <button class="danger" id="tamperBtn">Tamper file</button>
+              <button class="secondary" id="restoreBtn">Restore</button>
+            </span>
+          </div>
+        </div>
+        <div id="verifyBanner"></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Artifact</th><th>SHA-256 (on-chain)</th><th>Transaction</th><th>Parents</th><th>Created by</th><th>Integrity</th></tr></thead>
+            <tbody id="artifacts"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div id="placeholder" class="card empty">Run a PTB-XL sample or upload an ECG to start.</div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const AGENTS = ["ingest","preprocess","features","predict","integrity","validate","explain"];
+let current = null, chart = null, ecgData = null, lastVerify = {};
+const jobTraces = {};   // case_id -> live agent trace (with final durations)
+const $ = (id) => document.getElementById(id);
+const short = (s, n = 10) => s ? s.slice(0, n) + "…" : "–";
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3500); }
+function key() { try { return localStorage.getItem("ecgtrace_key") || ""; } catch { return ""; } }
+async function api(path, opts = {}) {
+  opts.headers = Object.assign({"X-API-Key": key()}, opts.headers || {});
+  const r = await fetch(path, opts);
+  const body = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(body.detail || r.statusText);
+  return body;
+}
+
+// ---------- header / health
+async function health() {
+  try {
+    const h = await api("/api/health");
+    const ok = (h.ledger_status || {}).status === "ok";
+    $("ledgerDot").className = "dot " + (ok ? "ok" : "bad");
+    $("ledgerTxt").textContent = `${h.ledger} — ${ok ? "connected" : "unreachable"}`;
+    const m = h.model || {};
+    $("modelTxt").textContent = m.name ? `${m.name} v${m.version}` + (m.test_metrics ? ` · test AUC ${m.test_metrics.roc_auc}` : "") : "model not loaded";
+    $("apikey").classList.toggle("hidden", !h.auth_required);
+    $("demoBox").classList.toggle("hidden", !h.demo_mode);
+  } catch (e) { $("ledgerTxt").textContent = "API unreachable"; }
+}
+$("apikey").value = key();
+$("apikey").addEventListener("change", e => { try { localStorage.setItem("ecgtrace_key", e.target.value); } catch {} });
+
+// ---------- tabs
+document.querySelectorAll(".tabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("active", x === b));
+  $("tab-sample").classList.toggle("hidden", b.dataset.tab !== "sample");
+  $("tab-upload").classList.toggle("hidden", b.dataset.tab !== "upload");
+});
+
+// ---------- samples
+let samples = [];
+async function loadSamples() {
+  try {
+    samples = await api("/api/samples");
+    $("sampleSel").innerHTML = samples.map(s => `<option value="${s.ecg_id}">#${s.ecg_id} — ${s.labels.join(", ") || "no label"}</option>`).join("");
+    sampleChanged();
+  } catch (e) { $("sampleSel").innerHTML = "<option>PTB-XL not downloaded</option>"; $("runSample").disabled = true; }
+}
+function sampleChanged() {
+  const s = samples.find(x => String(x.ecg_id) === $("sampleSel").value);
+  if (!s) return;
+  $("sampleInfo").textContent = "Report: " + s.report;
+  $("dlCsv").href = `/api/samples/${s.ecg_id}/ecg.csv`;
+  $("dlRep").href = `/api/samples/${s.ecg_id}/report.txt`;
+}
+$("sampleSel").onchange = sampleChanged;
+$("runSample").onclick = async () => {
+  try { const j = await api(`/api/samples/${$("sampleSel").value}/run`, {method: "POST"}); follow(j); }
+  catch (e) { toast(e.message); }
+};
+$("tab-upload").onsubmit = async (ev) => {
+  ev.preventDefault();
+  const fd = new FormData(ev.target);
+  for (const [k, v] of [...fd.entries()]) if (v instanceof File && !v.name) fd.delete(k);
+  try { const j = await api("/api/cases", {method: "POST", body: fd}); if (j.notes?.length) toast(j.notes.join("; ")); follow(j); }
+  catch (e) { toast(e.message); }
+};
+
+// ---------- live pipeline
+function renderPipeline(trace = [], done = false) {
+  const by = Object.fromEntries(trace.map(t => [t.agent.replace("agent.", ""), t]));
+  $("pipeline").innerHTML = AGENTS.map(a => {
+    const t = by[a]; const st = t ? t.status : (done ? "skipped" : "pending");
+    const label = t ? `${st}${t.attempts > 1 ? " · " + t.attempts + " tries" : ""}${t.duration_ms ? " · " + (t.duration_ms / 1000).toFixed(1) + " s" : ""}` : (done ? "not run" : "waiting");
+    return `<div class="step ${st}" title="${esc(t ? (t.role + (t.message ? " — " + t.message : "")) : "")}">
+      <div class="name">${a}</div><div class="meta"><span class="badge ${st}">${esc(label)}</span></div>
+      <div class="meta">${t ? t.artifacts.length + " artifact(s)" : ""}</div></div>`;
+  }).join("");
+}
+async function follow(job) {
+  $("jobInfo").textContent = `Job ${job.job_id} — case ${job.case_id} — running…`;
+  renderPipeline([]);
+  // hide the previous case while the new one is being processed (avoids mixing two cases on screen)
+  current = null;
+  $("caseView").classList.add("hidden");
+  $("placeholder").classList.remove("hidden");
+  $("placeholder").textContent = `Processing ${job.case_id}… the result appears here when the agents are done.`;
+  const tick = async () => {
+    let s; try { s = await api(`/api/jobs/${job.job_id}`); } catch (e) { toast(e.message); return; }
+    renderPipeline(s.agent_trace, s.status !== "running");
+    $("jobInfo").textContent = `Job ${s.job_id} — case ${s.case_id} — ${s.status} — ${s.n_artifacts} artifact(s) on the ledger`;
+    if (s.status === "running") return setTimeout(tick, 800);
+    if (s.status === "error") return toast(s.error);
+    jobTraces[s.case_id] = s.agent_trace;
+    if (s.result?.status === "FAILED") toast("Case FAILED: " + (s.result.error || ""));
+    loadCases(); openCase(s.case_id);
+  };
+  tick();
+}
+
+// ---------- cases
+async function loadCases() {
+  try {
+    const cs = await api("/api/cases");
+    $("caseList").innerHTML = cs.length ? cs.map(c => `<li data-id="${c.case_id}"><span class="mono">${c.case_id}</span>
+      <span class="badge ${c.decision || "none"}">${c.decision ? c.decision.replace("_REQUIRED", "") : "…"}</span></li>`).join("")
+      : `<li class="small">No case yet</li>`;
+    $("caseList").querySelectorAll("li[data-id]").forEach(li => li.onclick = () => openCase(li.dataset.id));
+  } catch (e) {}
+}
+$("refreshCases").onclick = loadCases;
+
+async function openCase(id) {
+  let c; try { c = await api(`/api/cases/${id}`); } catch (e) { return toast(e.message); }
+  current = c; lastVerify = {};
+  $("placeholder").classList.add("hidden"); $("caseView").classList.remove("hidden");
+  $("caseId").textContent = c.case_id;
+  const dec = c.final?.decision || "UNKNOWN";
+  $("decision").className = "badge " + dec; $("decision").textContent = dec.replace("_", " ");
+  const p = c.prediction;
+  $("predClass").textContent = p ? p.predicted_class : "–";
+  $("confTxt").textContent = p ? (p.confidence * 100).toFixed(0) + "%" : "";
+  $("confBar").style.width = p ? (p.confidence * 100) + "%" : "0";
+  $("modelUsed").textContent = p ? `${p.model_name} v${p.model_version}` : "";
+  const checks = c.validation?.checks || [];
+  $("checks").innerHTML = checks.map(k => `<li><span class="ic ${k.passed ? "pass" : "fail"}">${k.passed ? "✓" : "✗"}</span>
+      <span><b>${esc(k.name)}</b><br><span class="small">${esc(k.message)}</span></span></li>`).join("") || `<li class="small">No validation record</li>`;
+  $("explanation").textContent = c.explanation || "–";
+  $("reportTxt").textContent = c.report || "–";
+  // trace stored in FINAL was written while agent.explain was still finishing -> it is complete now
+  const trace = jobTraces[c.case_id] || (c.agent_trace || []).map(t => t.status === "running" && c.final ? {...t, status: "ok"} : t);
+  if (trace.length) renderPipeline(trace, true);
+  $("jobInfo").textContent = trace.length ? `Case ${c.case_id} — ${c.artifacts.length} artifact(s) on the ledger` : "";
+  renderArtifacts();
+  $("verifyBanner").innerHTML = "";
+  try { ecgData = await api(`/api/cases/${id}/ecg`); } catch { ecgData = null; }
+  drawChart();
+}
+
+function renderArtifacts() {
+  if (!current) return;
+  $("artifacts").innerHTML = current.artifacts.map(a => {
+    const v = lastVerify[a.artifact_id]; const st = v ? v.status : "none";
+    const recomputed = v && v.recomputed_sha256 && v.status !== "VALID" ? `<div class="small fail">recomputed ${short(v.recomputed_sha256, 16)}</div>` : "";
+    return `<tr><td><b>${a.artifact_type}</b><div class="mono small">${a.artifact_id}</div></td>
+      <td class="mono" title="${a.sha256}">${short(a.sha256, 16)}${recomputed}</td>
+      <td class="mono" title="${a.tx_id || ""}">${short(a.tx_id, 12)}<div class="small">${esc(a.ledger_timestamp || a.created_at)}</div></td>
+      <td class="mono small">${a.parent_ids.map(p => p.split("-")[0]).join(", ") || "input"}</td>
+      <td class="small">${esc(a.creator_id)}${a.submitter ? `<div class="mono" title="${esc(a.submitter)}">${esc(a.submitter.split("::")[0])}</div>` : ""}</td>
+      <td><span class="badge ${st}">${v ? st : "not checked"}</span></td></tr>`;
+  }).join("");
+}
+
+$("verifyBtn").onclick = async () => {
+  if (!current) return;
+  try {
+    const v = await api(`/api/cases/${current.case_id}/verify`, {method: "POST"});
+    lastVerify = Object.fromEntries(v.artifacts.map(a => [a.artifact_id, a]));
+    renderArtifacts();
+    const bad = v.artifacts.filter(a => a.status !== "VALID");
+    $("verifyBanner").innerHTML = `<div class="banner ${v.overall}">${v.overall === "VALID"
+      ? "✓ All " + v.artifacts.length + " artifacts match their on-chain fingerprints."
+      : "✗ Integrity problem: " + bad.map(a => a.artifact_type + " " + a.status).join(", ") + " — the stored file no longer matches the blockchain record."}</div>`;
+  } catch (e) { toast(e.message); }
+};
+$("tamperBtn").onclick = async () => {
+  if (!current) return;
+  try { const r = await api(`/api/cases/${current.case_id}/tamper`, {method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({artifact_type: $("tamperType").value})});
+        toast(`${r.artifact_type} file modified (${r.change}). Now click “Verify integrity”.`); }
+  catch (e) { toast(e.message); }
+};
+$("restoreBtn").onclick = async () => {
+  if (!current) return;
+  try { await api(`/api/cases/${current.case_id}/restore`, {method: "POST", headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({artifact_type: $("tamperType").value})});
+        toast("Original file restored."); }
+  catch (e) { toast(e.message); }
+};
+
+// ---------- chart
+$("sigMode").onchange = drawChart;
+function drawChart() {
+  if (chart) { chart.destroy(); chart = null; }
+  if (!ecgData || typeof Chart === "undefined") return;
+  const mode = $("sigMode").value;
+  const y = mode === "raw" ? ecgData.raw : ecgData.processed;
+  if (!y) return;
+  const xs = y.map((_, i) => (i / ecgData.fs).toFixed(2));
+  const peaks = new Set(mode === "processed" ? (ecgData.r_peaks || []) : []);
+  const css = getComputedStyle(document.documentElement);
+  chart = new Chart($("chart"), {
+    type: "line",
+    data: { labels: xs, datasets: [
+      { data: y, borderColor: css.getPropertyValue("--accent").trim(), borderWidth: 1.2, pointRadius: 0, tension: 0 },
+      { data: y.map((v, i) => peaks.has(i) ? v : null), showLine: false, pointRadius: 4, pointStyle: "crossRot",
+        borderColor: css.getPropertyValue("--bad").trim(), borderWidth: 2 } ]},
+    options: { animation: false, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { ticks: { maxTicksLimit: 11, callback: (v, i) => xs[i] + " s" }, grid: { display: false } },
+                y: { title: { display: true, text: mode === "raw" ? "mV" : "z-score" } } } }
+  });
+}
+
+health(); loadSamples(); loadCases(); renderPipeline([]);
+setInterval(health, 15000);
+</script>
+</body>
+</html>

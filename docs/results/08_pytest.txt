@@ -1,0 +1,76 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.4, pytest-9.2.0, pluggy-1.7.0 -- /home/chaima/ecg-trace/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/chaima/ecg-trace
+configfile: pytest.ini
+testpaths: tests
+plugins: langsmith-0.14.16, anyio-4.16.0
+collecting ... collected 59 items
+
+tests/test_agents.py::test_happy_path PASSED                             [  1%]
+tests/test_agents.py::test_bad_signal_routes_around_ai PASSED            [  3%]
+tests/test_agents.py::test_agent_crash_is_traced_and_rejected PASSED     [  5%]
+tests/test_agents.py::test_ledger_retry_then_success PASSED              [  6%]
+tests/test_agents.py::test_ledger_down_stops_the_case PASSED             [  8%]
+tests/test_agents.py::test_pseudonymisation_at_ingest PASSED             [ 10%]
+tests/test_agents.py::test_pseudonymise_text_unit PASSED                 [ 11%]
+tests/test_agents.py::test_mermaid_diagram PASSED                        [ 13%]
+tests/test_agents.py::test_retry_does_not_duplicate_artifacts PASSED     [ 15%]
+tests/test_agents.py::test_case_id_with_digits_is_not_taken_for_a_phone PASSED [ 16%]
+tests/test_api.py::test_health PASSED                                    [ 18%]
+tests/test_api.py::test_upload_run_and_view PASSED                       [ 20%]
+tests/test_api.py::test_tamper_verify_restore PASSED                     [ 22%]
+tests/test_api.py::test_tamper_binary_artifact PASSED                    [ 23%]
+tests/test_api.py::test_bad_upload PASSED                                [ 25%]
+tests/test_api.py::test_resample_500hz PASSED                            [ 27%]
+tests/test_api.py::test_api_key_required PASSED                          [ 28%]
+tests/test_api.py::test_unknown_case PASSED                              [ 30%]
+tests/test_api.py::test_ui_served PASSED                                 [ 32%]
+tests/test_api.py::test_double_tamper_stays_modified PASSED              [ 33%]
+tests/test_contract.py::test_json_hash_is_order_independent PASSED       [ 35%]
+tests/test_contract.py::test_array_hash_detects_single_change PASSED     [ 37%]
+tests/test_contract.py::test_text_hash_ignores_line_endings PASSED       [ 38%]
+tests/test_contract.py::test_fake_ledger_roundtrip_and_no_overwrite PASSED [ 40%]
+tests/test_fabric_client.py::test_roundtrip PASSED                       [ 42%]
+tests/test_fabric_client.py::test_errors_become_ledger_errors PASSED     [ 44%]
+tests/test_fabric_client.py::test_factory PASSED                         [ 45%]
+tests/test_model.py::test_features_shape_and_determinism PASSED          [ 47%]
+tests/test_model.py::test_predict_artifact_fields PASSED                 [ 49%]
+tests/test_preprocess.py::test_clean_signal_ok PASSED                    [ 50%]
+tests/test_preprocess.py::test_bandpass_removes_baseline_drift PASSED    [ 52%]
+tests/test_preprocess.py::test_few_nans_are_interpolated_and_penalised PASSED [ 54%]
+tests/test_preprocess.py::test_many_nans_rejected PASSED                 [ 55%]
+tests/test_preprocess.py::test_flat_lead_detected PASSED                 [ 57%]
+tests/test_preprocess.py::test_wrong_format_rejected PASSED              [ 59%]
+tests/test_preprocess.py::test_dataset_flags_penalise PASSED             [ 61%]
+tests/test_preprocess.py::test_prepare_report PASSED                     [ 62%]
+tests/test_run_case.py::test_full_chain_recorded PASSED                  [ 64%]
+tests/test_run_case.py::test_verify_all_valid PASSED                     [ 66%]
+tests/test_run_case.py::test_tampering_detected PASSED                   [ 67%]
+tests/test_run_case.py::test_missing_and_unverifiable PASSED             [ 69%]
+tests/test_run_case.py::test_contradicting_report_needs_review PASSED    [ 71%]
+tests/test_run_case.py::test_bad_signal_rejected_but_traced PASSED       [ 72%]
+tests/test_validate.py::test_report_interpretation[sinus rhythm. normal ecg.-NORM] PASSED [ 74%]
+tests/test_validate.py::test_report_interpretation[sinusrhythmus normales ekg-NORM] PASSED [ 76%]
+tests/test_validate.py::test_report_interpretation[sinusrhythmus linkstyp linksschenkelblock-ABNORMAL] PASSED [ 77%]
+tests/test_validate.py::test_report_interpretation[sinus rhythm. non-specific t wave flattening in i, avl-ABNORMAL] PASSED [ 79%]
+tests/test_validate.py::test_report_interpretation[sinusrhythmus a-v block i lagetyp normal qrs(t) abnorm inferiorer infarkt-ABNORMAL] PASSED [ 81%]
+tests/test_validate.py::test_report_interpretation[sinus rhythm. normal axis.-UNKNOWN] PASSED [ 83%]
+tests/test_validate.py::test_report_interpretation[-UNKNOWN] PASSED      [ 84%]
+tests/test_validate.py::test_accepted PASSED                             [ 86%]
+tests/test_validate.py::test_low_confidence_review PASSED                [ 88%]
+tests/test_validate.py::test_low_quality_review PASSED                   [ 89%]
+tests/test_validate.py::test_report_contradiction_review PASSED          [ 91%]
+tests/test_validate.py::test_unclear_report_not_penalised PASSED         [ 93%]
+tests/test_validate.py::test_missing_artifact_rejected PASSED            [ 94%]
+tests/test_validate.py::test_integrity_failure_rejected PASSED           [ 96%]
+tests/test_validate.py::test_explanation_and_final PASSED                [ 98%]
+tests/test_validate.py::test_rejected_final_has_no_prediction PASSED     [100%]
+
+=============================== warnings summary ===============================
+.venv/lib/python3.14/site-packages/langsmith/_internal/_beta_decorator.py:92: 13 warnings
+  /home/chaima/ecg-trace/.venv/lib/python3.14/site-packages/langsmith/_internal/_beta_decorator.py:92: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(func):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================= 59 passed, 13 warnings in 2.03s ========================
