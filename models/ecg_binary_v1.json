@@ -1,0 +1,85 @@
+{
+  "model_name": "ecg-binary-norm-vs-abnormal",
+  "model_version": "1.0.0",
+  "algorithm": "hist_gradient_boosting",
+  "task": "binary: NORM vs ABNORMAL (any of MI, STTC, CD, HYP)",
+  "dataset": "PTB-XL v1.0.3, 100 Hz, local subset",
+  "split": "strat_fold 1-8 train / 9 val / 10 test",
+  "n_records": {
+    "train": 1568,
+    "val": 196,
+    "test": 196
+  },
+  "training_ids_sha256": "7cf6bd6ad8998792e693446071c392d5cf470455f4ac9aaade0821cd83252937",
+  "validation_metrics": {
+    "logreg": {
+      "accuracy": 0.8316,
+      "f1_macro": 0.8261,
+      "roc_auc": 0.9064
+    },
+    "random_forest": {
+      "accuracy": 0.8316,
+      "f1_macro": 0.8267,
+      "roc_auc": 0.9202
+    },
+    "hist_gradient_boosting": {
+      "accuracy": 0.8163,
+      "f1_macro": 0.8119,
+      "roc_auc": 0.9355
+    }
+  },
+  "test_metrics": {
+    "accuracy": 0.8214,
+    "f1_macro": 0.8206,
+    "roc_auc": 0.9183
+  },
+  "confusion_matrix_test": {
+    "labels": [
+      "ABNORMAL",
+      "NORM"
+    ],
+    "matrix": [
+      [
+        87,
+        24
+      ],
+      [
+        11,
+        74
+      ]
+    ]
+  },
+  "confidence_table_test": [
+    {
+      "threshold": 0.5,
+      "coverage": 1.0,
+      "accuracy": 0.821
+    },
+    {
+      "threshold": 0.6,
+      "coverage": 0.969,
+      "accuracy": 0.837
+    },
+    {
+      "threshold": 0.7,
+      "coverage": 0.939,
+      "accuracy": 0.848
+    },
+    {
+      "threshold": 0.8,
+      "coverage": 0.893,
+      "accuracy": 0.863
+    },
+    {
+      "threshold": 0.9,
+      "coverage": 0.821,
+      "accuracy": 0.876
+    }
+  ],
+  "preprocess_version": "preprocess-1.1.0",
+  "features_version": "features-1.0.0",
+  "n_features": 436,
+  "sklearn_version": "1.9.1",
+  "python_version": "3.14.4",
+  "trained_at": "2026-11-01T14:30:15+0100"
+}

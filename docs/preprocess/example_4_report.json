@@ -1,0 +1,63 @@
+{
+  "ecg": {
+    "software_version": "preprocess-1.0.0",
+    "params": {
+      "expected_fs": 100,
+      "expected_n_samples": 1000,
+      "n_leads": 12,
+      "bandpass_hz": [
+        0.5,
+        40.0
+      ],
+      "filter_order": 4,
+      "max_nan_ratio": 0.05,
+      "flat_lead_std_mv": 0.01,
+      "extreme_amplitude_mv": 5.0,
+      "hr_range_bpm": [
+        30,
+        200
+      ],
+      "min_beats": 4,
+      "beat_window_s": [
+        0.25,
+        0.45
+      ],
+      "rpeak_lead": 1
+    },
+    "status": "OK",
+    "checks": {
+      "shape": [
+        1000,
+        12
+      ],
+      "nan_ratio": 0.0,
+      "flat_leads": [],
+      "extreme_amplitude_ratio": 0.0,
+      "n_r_peaks": 13,
+      "heart_rate_bpm": 75.1,
+      "n_beats": 12,
+      "dataset_quality_flags": [
+        "baseline_drift"
+      ]
+    },
+    "warnings": [],
+    "quality_score": 0.95,
+    "output": {
+      "signal_shape": [
+        1000,
+        12
+      ],
+      "beats_shape": [
+        12,
+        70,
+        12
+      ]
+    }
+  },
+  "report_text": {
+    "text_clean": "sinusrhythmus normales ekg",
+    "language": "de",
+    "n_chars": 26,
+    "empty": false
+  }
+}

@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/raw/*
+!data/raw/.gitkeep
+data/offchain/*
+!data/offchain/.gitkeep
+data/fake_ledger.json
+models/*.pkl
+docs/exploration/
+fabric-samples/
+node_modules/data/features_cache.npz

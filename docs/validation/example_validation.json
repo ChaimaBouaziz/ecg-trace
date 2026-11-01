@@ -1,0 +1,83 @@
+{
+  "prediction": {
+    "predicted_class": "NORM",
+    "confidence": 0.9994,
+    "probabilities": {
+      "ABNORMAL": 0.0006,
+      "NORM": 0.9994
+    },
+    "model_name": "ecg-binary-norm-vs-abnormal",
+    "model_version": "1.0.0",
+    "model_file_sha256": "ef46c6828d807f90b8201bdd59582059ea391e3eb65954044885a545fdb46b01",
+    "input_artifact_id": "FEATURES-57",
+    "analysed_at": "2026-11-01T13:36:59+00:00"
+  },
+  "validation": {
+    "status": "ACCEPTED",
+    "checks": [
+      {
+        "name": "artifacts_complete",
+        "passed": true,
+        "value": [],
+        "threshold": null,
+        "message": "all required artifacts present"
+      },
+      {
+        "name": "integrity",
+        "passed": true,
+        "value": true,
+        "threshold": true,
+        "message": "previous artifacts match their recorded hashes"
+      },
+      {
+        "name": "ai_confidence",
+        "passed": true,
+        "value": 0.9994,
+        "threshold": 0.8,
+        "message": "confidence 1.00"
+      },
+      {
+        "name": "data_quality",
+        "passed": true,
+        "value": 1.0,
+        "threshold": 0.8,
+        "message": "quality score 1.00"
+      },
+      {
+        "name": "report_coherence",
+        "passed": true,
+        "value": {
+          "report": "NORM",
+          "ai": "NORM"
+        },
+        "threshold": null,
+        "message": "AI result agrees with the report"
+      }
+    ],
+    "failed_checks": [],
+    "report_interpretation": "NORM",
+    "rules": {
+      "min_confidence": 0.8,
+      "min_quality_score": 0.8,
+      "required_artifacts": [
+        "RAW_ECG",
+        "RAW_REPORT",
+        "PROCESSED",
+        "FEATURES",
+        "PREDICTION"
+      ]
+    },
+    "software_version": "validation-1.0.0"
+  },
+  "explanation": {
+    "text": "The model ecg-binary-norm-vs-abnormal v1.0.0 classified this recording as a normal ECG with a confidence of 100%. Measured heart rate: 65 bpm over 10 complete beats; signal quality score 1.00. The medical report was read as NORM. Accepted for the prototype: all configured checks passed. This is an educational prototype, not a medical diagnosis.",
+    "lines": [
+      "The model ecg-binary-norm-vs-abnormal v1.0.0 classified this recording as a normal ECG with a confidence of 100%.",
+      "Measured heart rate: 65 bpm over 10 complete beats; signal quality score 1.00.",
+      "The medical report was read as NORM.",
+      "Accepted for the prototype: all configured checks passed.",
+      "This is an educational prototype, not a medical diagnosis."
+    ],
+    "software_version": "explain-1.0.0"
+  }
+}
