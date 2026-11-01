@@ -1,0 +1,54 @@
+# ECG-Trace application stack.
+#
+# Hyperledger Fabric itself is started by the official test-network (./scripts/fabric.sh up),
+# which already runs in Docker on the network "fabric_test". This stack joins that network.
+#
+#   docker compose up -d --build            # gateway + API on Fabric   -> http://localhost:8000
+#   LEDGER=fake docker compose up -d --build api   # API alone with the FakeLedger
+#                                                  # (without Fabric, create the network once: docker network create fabric_test)
+#   docker compose logs -f                  # follow logs
+#   docker compose down                     # stop (data/ is kept on your disk)
+#
+# Variables (shell or .env file): FABRIC_SAMPLES (default ~/fabric-samples), LEDGER (fabric|fake),
+# API_KEY (optional), APP_UID (default 1000 = first WSL user).
+
+services:
+  gateway:
+    build: ./blockchain-gateway
+    container_name: ecgtrace-gateway
+    environment:
+      FABRIC_SAMPLES: /fabric
+      CHANNEL: ecgchannel
+      CHAINCODE: ecgtrace
+      PEER_ENDPOINT: peer0.org1.example.com:7051      # container-to-container, inside fabric_test
+      PEER_HOST_ALIAS: peer0.org1.example.com
+    volumes:
+      # crypto material (certificates + private key of User1@org1), read-only
+      - ${FABRIC_SAMPLES:-~/fabric-samples}/test-network/organizations:/fabric/test-network/organizations:ro
+    ports:
+      - "3001:3001"
+    networks: [fabric]
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      args:
+        APP_UID: ${APP_UID:-1000}
+    container_name: ecgtrace-api
+    environment:
+      LEDGER: ${LEDGER:-fabric}
+      FABRIC_GATEWAY_URL: http://gateway:3001
+      API_KEY: ${API_KEY:-}
+      DEMO_MODE: "1"
+    volumes:
+      - ./data:/app/data            # off-chain store, PTB-XL samples, tamper backups (persist on host)
+    ports:
+      - "8000:8000"
+    networks: [fabric]
+    restart: unless-stopped
+
+networks:
+  fabric:
+    name: fabric_test               # created by ./scripts/fabric.sh up
+    external: true

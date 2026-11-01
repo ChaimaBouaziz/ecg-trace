@@ -20,7 +20,7 @@ recorded on Hyperledger Fabric. Dataset: **PTB-XL v1.0.3** (PhysioNet).
 | 7 | Agents: LangGraph orchestrator, 7 agents + audit, retries, traced errors, pseudonymisation — `agents/orchestrator.py`, `scripts/run_agents_demo.py` | C | ✅ |
 | 8 | FastAPI + web dashboard (live agents, ECG chart, provenance, verify, tamper demo) — `api/main.py`, `ui/index.html` | C | ✅ |
 | 9 | Integrity verification + tamper demo + tests | all | |
-| 10 | Docker + final report | all | |
+| 10 | Docker (`Dockerfile`, `blockchain-gateway/Dockerfile`, `docker-compose.yml`, `scripts/demo_up.sh`) + final report | all | Docker ✅ |
 
 ## The shared contract (read this first)
 
@@ -82,6 +82,17 @@ Open http://localhost:8000 -> run a sample -> watch the agents -> **Verify integ
 **Tamper file** -> **Verify integrity** (MODIFIED) -> **Restore** -> **Verify** (VALID).
 Without Fabric: `uvicorn api.main:app --port 8000` (FakeLedger). API docs: http://localhost:8000/docs.
 Optional security: `API_KEY=secret` -> write operations require the `X-API-Key` header.
+
+## Run with Docker (one command)
+
+```bash
+./scripts/demo_up.sh          # starts Fabric if needed, then builds + runs gateway and API containers
+./scripts/demo_up.sh down     # stops the app containers (Fabric keeps running)
+```
+- Fabric runs in the official test-network containers; the app containers join its `fabric_test` network.
+- `data/` is mounted from your disk, so off-chain files and PTB-XL samples persist between runs.
+- Stop the manual `npm start` / `uvicorn` first (ports 3001 and 8000).
+- FakeLedger only: `docker network create fabric_test` once, then `LEDGER=fake docker compose up -d --build api`.
 
 ## Layout
 

@@ -1,0 +1,13 @@
+.git
+.venv
+**/__pycache__
+**/*.pyc
+.pytest_cache
+**/node_modules
+data
+docs
+tests
+chaincode
+blockchain-gateway
+*.md
+.env
